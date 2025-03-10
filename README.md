@@ -8,6 +8,13 @@ A little about <strong>me:</strong>
 - I am taking STATS 220 because I am studying Data Science
 - I am interested in learning about Data Science
 
+<em>My favourite things to do: </em>
+1. Play golf
+2. Listen to music
+3. Travel
+
+
+
 
 
 <h4>A meme that captures how I currently feel about my university studies is </h4>
