@@ -1,0 +1,130 @@
+---
+title: My dynamic report
+output: html_fragment
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, message=FALSE, warning=FALSE, error=FALSE)
+
+```
+
+```{css}
+body {
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  background-color: #fdfdfd;
+  color: #333;
+  margin: 30px;
+}
+
+h2 {
+  color: #2a6592;
+  border-bottom: 2px solid #dce3e8;
+  padding-bottom: 5px;
+}
+
+p {
+  margin: 10px 0;
+}
+
+code {
+  background-color: #f4f4f4;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-size: 90%;
+}
+
+img, svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.plot {
+  margin-bottom: 30px;
+```
+
+## How Weather and Outdoor Activity Affect Mood Ratings
+
+
+This report explores how different weather conditions and outdoor activity are related to people's mood ratings. The data was collected through a Google Form and includes time stamped responses.
+
+
+
+```{r load-data, echo=FALSE}
+library(tidyverse)
+url <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vQjOVXtP9P-khr5HwpOsELaxTMRiukC-JDQ33dw354e1vlAciV1ml-rx4LPUrj3oaYqbKs5WdBaXGG7/pub?output=csv"
+logged_data <- read_csv(url)
+latest_data <- rename(logged_data,
+                      time = `Timestamp`,
+                      score = `Score`,
+                      weather = `What is the weather like today?`,
+                      rating = `On a scale of 1-10, How would you rate your mood?`,
+                      outdoors = `Did you spend time outdoors today?`)
+latest_data <- latest_data %>% select(-score)
+
+
+```
+
+```{r summary-values}
+mean_rating <- mean(latest_data$rating, na.rm = TRUE)
+max_rating <- max(latest_data$rating, na.rm = TRUE)
+min_rating <- min(latest_data$rating, na.rm = TRUE)
+```
+
+<br>
+
+### Summary Statistics
+
+The average mood rating across all responses was `r round(mean_rating, 1)`, with the highest rating being `r max_rating` and the lowest rating being `r min_rating`.
+
+<br>
+
+```{r mood-by-weather-chart}
+latest_data %>%
+  group_by(weather) %>%
+  summarise(avg_rating = mean(rating, na.rm = TRUE)) %>%
+  ggplot(aes(x = weather, y = avg_rating)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  labs(title = "Average Mood Rating by Weather",
+       x = "Weather",
+       y = "Average Mood Rating") +
+  theme_minimal()
+```
+
+<br>
+
+```{r mood-by-outdoors-activity-chart}
+latest_data %>%
+  group_by(outdoors) %>%
+  summarise(avg_rating = mean(rating, na.rm = TRUE)) %>%
+  ggplot(aes(x = outdoors, y = avg_rating)) +
+  geom_bar(stat = "identity", fill = "forestgreen") +
+  labs(title = "Average Mood Rating by Outdoor Activity",
+       x = "Spent Time Outdoors?",
+       y = "Average Mood Rating") +
+  theme_minimal()
+```
+
+<br>
+
+```{r proportion-of-people-going-outside-by-weather-chart}
+latest_data %>%
+  group_by(weather) %>%
+  summarise(prop_outdoors = mean(outdoors == "Yes", na.rm = TRUE)) %>%
+  ggplot(aes(x = weather, y = prop_outdoors)) +
+  geom_bar(stat = "identity", fill = "tomato") +
+  labs(title = "Proportion of People Who Went Outdoors by Weather",
+       x = "Weather",
+       y = "Proportion Who Went Outside") +
+  theme_minimal()
+```
+
+<br>
+
+## Conclusion
+
+The average mood rating across all responses was **5.9**, with a minimum of **2** and a maximum of **10**. When exploring how mood varies by weather conditions, we found that mood ratings were highest on **sunny days** (7.1 on average), followed by **windy days** (6.75). In contrast, **cloudy** and **rainy** days had notably lower average mood ratings (4.3 and 4.0 respectively).
+
+Outdoor activity also appeared to influence mood: participants who spent time outdoors reported an average mood rating of **6.25**, compared to **5.44** for those who did not. Interestingly, the likelihood of going outside also varied by weather—people were most likely to go outside on **cloudy** and **sunny** days, and least likely on **windy** days.
+
+These results suggest that both **weather conditions** and **time spent outdoors** play a role in people's reported mood, with **sunshine and outdoor activity** associated with more positive mood ratings.
